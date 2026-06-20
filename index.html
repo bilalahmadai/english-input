@@ -1,0 +1,1425 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Volka English Course</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    :root {
+      --bg: #f5f5f7;
+      --surface: #ffffff;
+      --surface-2: #fbfbfd;
+      --text: #1d1d1f;
+      --muted: #6e6e73;
+      --line: #d2d2d7;
+      --line-soft: #e8e8ed;
+      --accent: #0071e3;
+      --accent-soft: #e8f2ff;
+      --radius: 18px;
+      --shadow: 0 1px 2px rgba(0,0,0,.05);
+      --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --sidebar-width: 300px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      line-height: 1.35;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    ::selection { background: var(--accent-soft); }
+    ::-webkit-scrollbar { width: 12px; height: 12px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb {
+      background: #c7c7cc;
+      border: 3px solid var(--bg);
+      border-radius: 999px;
+    }
+    ::-webkit-scrollbar-thumb:active { background: #a8a8ad; }
+
+    .app {
+      min-height: 100vh;
+    }
+
+    .sidebar-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .38);
+      z-index: 35;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .28s ease;
+    }
+
+    aside,
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 40;
+      width: var(--sidebar-width);
+      max-width: 88vw;
+      height: 100vh;
+      overflow: auto;
+      padding: 18px 16px 24px;
+      border-right: 1px solid var(--line-soft);
+      background: rgba(245,245,247,.97);
+      backdrop-filter: blur(18px);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      transform: translateX(0);
+      transition: transform .28s ease;
+    }
+    body.sidebar-collapsed aside,
+    body.sidebar-collapsed .sidebar {
+      transform: translateX(-105%);
+    }
+
+    .content-shell {
+      min-height: 100vh;
+      margin-left: var(--sidebar-width);
+      transition: margin-left .28s ease;
+    }
+    body.sidebar-collapsed .content-shell {
+      margin-left: 0;
+    }
+
+    .sidebar-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .icon-btn {
+      appearance: none;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      font-size: 15px;
+      flex-shrink: 0;
+      transition: background .15s ease, color .15s ease;
+    }
+    .icon-btn:hover {
+      background: var(--surface-2);
+      color: var(--text);
+    }
+
+    .sidebar-open-btn {
+      position: fixed;
+      top: calc(16px + env(safe-area-inset-top, 0px));
+      left: calc(16px + env(safe-area-inset-left, 0px));
+      z-index: 30;
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      border: 1px solid var(--line-soft);
+      background: var(--surface);
+      box-shadow: 0 4px 18px rgba(0, 0, 0, .12), 0 2px 6px rgba(0, 0, 0, .06);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-6px);
+      transition: opacity .22s ease, transform .22s ease, box-shadow .22s ease;
+    }
+    .sidebar-open-btn:hover {
+      box-shadow: 0 6px 22px rgba(0, 0, 0, .16), 0 2px 8px rgba(0, 0, 0, .08);
+    }
+    body.sidebar-collapsed .sidebar-open-btn {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .brand {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .sidebar-progress {
+      padding: 14px;
+    }
+    .sidebar-progress-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .sidebar-progress-top strong {
+      font-size: 22px;
+      letter-spacing: -.04em;
+    }
+    .sidebar-progress-top span {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 650;
+    }
+    .sidebar-progress-bar {
+      height: 6px;
+      background: var(--line-soft);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .sidebar-progress-bar span {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), #34c759);
+      border-radius: 999px;
+      transition: width .3s ease;
+    }
+    .sidebar-progress-meta {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+    .sidebar-chip {
+      font-size: 11px;
+      font-weight: 650;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--line-soft);
+      background: var(--surface-2);
+      color: var(--muted);
+    }
+    .sidebar-chip.done { color: #007a3d; background: #e8f9ef; border-color: #b8ebd0; }
+    .sidebar-chip.skipped { color: #8a6d00; background: #fff8dc; border-color: #f0e0a0; }
+    .sidebar-chip i { margin-right: 4px; font-size: 10px; }
+    .sidebar-progress-top span i { margin-right: 4px; font-size: 11px; opacity: .75; }
+
+    .sidebar-section {
+      padding: 12px;
+    }
+    .sidebar-section-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .03em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .sidebar-section-head .dot { display: none; }
+    .sidebar-section-head i {
+      color: var(--accent);
+      font-size: 13px;
+      width: 16px;
+      text-align: center;
+    }
+
+    .controls label:first-of-type { margin-top: 0; }
+    .controls label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .filter-icon {
+      width: 16px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .nav-block { display: grid; gap: 6px; }
+
+    .nav-title {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      margin: 0 0 8px 2px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .nav-title i { font-size: 12px; opacity: .85; }
+
+    .nav-list { display: grid; gap: 4px; }
+    .nav-item {
+      appearance: none;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text);
+      width: 100%;
+      text-align: left;
+      border-radius: 12px;
+      padding: 8px 10px;
+      font: inherit;
+      font-size: 13px;
+      cursor: pointer;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 8px;
+      transition: background .15s ease, border-color .15s ease;
+    }
+    .nav-item:hover { background: var(--surface-2); }
+    .nav-item.active {
+      background: var(--accent-soft);
+      border-color: #d6eaff;
+      box-shadow: var(--shadow);
+    }
+    .nav-item.active .nav-label { color: var(--accent); font-weight: 650; }
+
+    .nav-label-wrap {
+      min-width: 0;
+      display: grid;
+      gap: 4px;
+    }
+    .nav-label {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .nav-week-bar {
+      height: 3px;
+      background: var(--line-soft);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .nav-week-bar span {
+      display: block;
+      height: 100%;
+      background: var(--accent);
+      border-radius: 999px;
+    }
+
+    .nav-count {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      background: var(--surface-2);
+      border: 1px solid var(--line-soft);
+      padding: 2px 7px;
+      border-radius: 999px;
+      min-width: 26px;
+      text-align: center;
+    }
+    .nav-item.active .nav-count {
+      color: var(--accent);
+      background: #fff;
+      border-color: #d6eaff;
+    }
+
+    main {
+      padding: 28px;
+      max-width: 1280px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: var(--text);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      letter-spacing: -.04em;
+    }
+
+    h1, h2, h3, p { margin: 0; }
+    h1 { font-size: 22px; letter-spacing: -.04em; }
+    .subtitle { color: var(--muted); font-size: 13px; margin-top: 2px; }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--line-soft);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .controls { padding: 0; margin-bottom: 0; border: 0; box-shadow: none; background: transparent; }
+    label { display: block; font-size: 12px; font-weight: 650; color: var(--muted); margin: 12px 0 7px; }
+    input, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: var(--surface-2);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 11px 12px;
+      font: inherit;
+      font-size: 14px;
+      outline: none;
+    }
+    input:focus, select:focus { border-color: var(--accent); background: #fff; }
+
+    /* nav-title/nav-list/nav-item defined above in sidebar block */
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.4fr .8fr;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .hero-card { padding: 22px; }
+    .hero h2 {
+      font-size: clamp(28px, 5vw, 54px);
+      letter-spacing: -.055em;
+      line-height: .98;
+      max-width: 780px;
+    }
+    .hero p { color: var(--muted); margin-top: 12px; max-width: 720px; }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .stat {
+      padding: 14px 14px 13px;
+      min-height: 108px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      transition: border-color .2s ease, box-shadow .2s ease;
+    }
+    .stat:hover {
+      border-color: var(--line);
+      box-shadow: 0 4px 14px rgba(0,0,0,.06);
+    }
+
+    .stat-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      font-size: 16px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .stat-body {
+      min-width: 0;
+      flex: 1;
+      display: grid;
+      gap: 2px;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 26px;
+      letter-spacing: -.04em;
+      line-height: 1.05;
+    }
+
+    .stat-label {
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 650;
+      letter-spacing: -.01em;
+    }
+
+    .stat-sub {
+      color: var(--muted);
+      font-size: 11px;
+      margin-top: 2px;
+    }
+
+    .stat-bar {
+      margin-top: 8px;
+      height: 4px;
+      background: var(--line-soft);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .stat-bar span {
+      display: block;
+      height: 100%;
+      border-radius: 999px;
+      transition: width .3s ease;
+    }
+
+    .stat-total .stat-icon { background: var(--accent-soft); color: var(--accent); }
+    .stat-done .stat-icon { background: #e8f9ef; color: #007a3d; }
+    .stat-done .stat-bar span { background: #34c759; }
+    .stat-skipped .stat-icon { background: #fff8dc; color: #8a6d00; }
+    .stat-skipped .stat-bar span { background: #e6c200; }
+    .stat-remaining .stat-icon { background: #f3f3f6; color: var(--muted); }
+    .stat-remaining .stat-bar span { background: var(--line); }
+
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 24px 0 12px;
+    }
+    .section-head h3 { font-size: 24px; letter-spacing: -.035em; }
+    .section-head p { color: var(--muted); font-size: 13px; }
+
+    .week {
+      margin-bottom: 22px;
+      scroll-margin-top: 24px;
+    }
+
+    .week-top {
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid var(--line-soft);
+    }
+    .week-title { font-size: 19px; font-weight: 750; letter-spacing: -.025em; }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--line-soft);
+      background: var(--surface-2);
+      color: var(--muted);
+      padding: 6px 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .grid {
+      padding: 14px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      overflow: hidden;
+      background: var(--surface);
+      border: 1px solid var(--line-soft);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .thumb {
+      position: relative;
+      aspect-ratio: 16 / 9;
+      background: #e8e8ed;
+      overflow: hidden;
+    }
+    .thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .thumb-fallback {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 650;
+      letter-spacing: -.01em;
+      background: #eeeeef;
+    }
+    .thumb img + .thumb-fallback { display: none; }
+    .duration {
+      position: absolute;
+      right: 8px;
+      bottom: 8px;
+      background: rgba(0,0,0,.78);
+      color: #fff;
+      border-radius: 7px;
+      padding: 3px 6px;
+      font-size: 12px;
+      font-weight: 650;
+      z-index: 1;
+    }
+
+    .done-badge {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      background: var(--accent);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1;
+      box-shadow: 0 2px 8px rgba(0,113,227,.35);
+      z-index: 1;
+    }
+
+    .card-body {
+      padding: 12px;
+      display: grid;
+      gap: 9px;
+      flex: 1;
+    }
+
+    .meta-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .tag {
+      background: var(--surface-2);
+      border: 1px solid var(--line-soft);
+      border-radius: 999px;
+      padding: 4px 7px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .tag.primary { color: var(--accent); background: var(--accent-soft); border-color: #d6eaff; }
+    .tag.completed { color: #007a3d; background: #e8f9ef; border-color: #b8ebd0; }
+    .tag.skipped-tag { color: #8a6d00; background: #fff8dc; border-color: #f0e0a0; }
+
+    .card h4 {
+      font-size: 15px;
+      line-height: 1.25;
+      letter-spacing: -.015em;
+      margin: 0;
+    }
+
+    .card p {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: auto;
+    }
+
+    .watch {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .watch.rewatch { color: var(--muted); }
+    .watch.rewatch:hover { color: var(--accent); }
+    .watch i { font-size: 11px; }
+    .status-btns {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status-btn {
+      appearance: none;
+      border: 1px solid var(--line-soft);
+      background: var(--surface-2);
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 4px 10px;
+      font: inherit;
+      font-size: 12px;
+      font-weight: 650;
+      cursor: pointer;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .status-btn i { font-size: 10px; }
+    .status-btn:hover { border-color: var(--line); background: #fff; }
+    .status-btn.done-btn.active {
+      color: var(--accent);
+      background: var(--accent-soft);
+      border-color: #d6eaff;
+    }
+    .status-btn.skip-btn.active {
+      color: #8a6d00;
+      background: #fff8dc;
+      border-color: #f0e0a0;
+    }
+
+    .card.done {
+      border-color: #d6eaff;
+      opacity: .88;
+    }
+    .card.done .thumb img { filter: saturate(.85); }
+    .card.skipped { opacity: .72; }
+    .card.skipped .thumb { filter: grayscale(.35); }
+
+    .week-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .week-progress {
+      display: block;
+      width: 120px;
+      height: 5px;
+      background: var(--line-soft);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .week-progress span {
+      display: block;
+      height: 100%;
+      background: var(--accent);
+      border-radius: 999px;
+      transition: width .25s ease;
+    }
+
+    .empty {
+      padding: 40px 20px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .mobile-bar { display: none; }
+
+    @media (max-width: 1050px) {
+      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .hero { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 760px) {
+      body:not(.sidebar-collapsed) { overflow: hidden; }
+      body:not(.sidebar-collapsed) .sidebar-backdrop {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .content-shell { margin-left: 0 !important; }
+      body.sidebar-collapsed aside,
+      body.sidebar-collapsed .sidebar { transform: translateX(-105%); }
+      body:not(.sidebar-collapsed) aside,
+      body:not(.sidebar-collapsed) .sidebar { transform: translateX(0); }
+      .sidebar-open-btn {
+        top: calc(22px + env(safe-area-inset-top, 0px));
+        left: calc(18px + env(safe-area-inset-left, 0px));
+        width: 46px;
+        height: 46px;
+        border-radius: 15px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, .14), 0 2px 8px rgba(0, 0, 0, .08);
+      }
+      main {
+        padding: 14px;
+        padding-top: calc(78px + env(safe-area-inset-top, 0px));
+      }
+      body:not(.sidebar-collapsed) main { padding-top: 14px; }
+      .sidebar-progress-top strong { font-size: 20px; }
+      .nav-list.panel { padding: 8px; }
+      .nav-list { grid-template-columns: 1fr; }
+      .hero-card { padding: 18px; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .grid { grid-template-columns: 1fr; padding: 10px; gap: 10px; }
+      .section-head { align-items: start; flex-direction: column; }
+      .week-top { align-items: start; flex-direction: column; }
+    }
+
+    @media (min-width: 761px) {
+      .sidebar-backdrop { display: none !important; }
+      body.sidebar-collapsed main { padding-top: 54px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar-backdrop" id="sidebarBackdrop" aria-hidden="true"></div>
+
+  <div class="app" id="app">
+    <aside id="sidebar" class="sidebar" aria-label="Course navigation">
+      <div class="sidebar-head">
+        <div class="brand">
+          <div class="mark"><i class="fa-solid fa-graduation-cap" aria-hidden="true"></i></div>
+          <div>
+            <h1>Volka English</h1>
+            <p class="subtitle">Confidence course dashboard</p>
+          </div>
+        </div>
+        <button type="button" id="sidebarCollapse" class="icon-btn" aria-label="Collapse sidebar" aria-controls="sidebar">
+          <i class="fa-solid fa-angles-left" aria-hidden="true"></i>
+        </button>
+      </div>
+
+      <div class="sidebar-progress panel">
+        <div class="sidebar-progress-top">
+          <div>
+            <strong id="sidebarPct">0%</strong>
+            <span><i class="fa-solid fa-chart-line"></i> course progress</span>
+          </div>
+          <span class="sidebar-chip" id="sidebarRemaining">0 left</span>
+        </div>
+        <div class="sidebar-progress-bar" title="Overall progress"><span id="sidebarBar" style="width:0%"></span></div>
+        <div class="sidebar-progress-meta">
+          <span class="sidebar-chip done" id="sidebarDone"><i class="fa-solid fa-check"></i>0 done</span>
+          <span class="sidebar-chip skipped" id="sidebarSkipped"><i class="fa-solid fa-forward"></i>0 skipped</span>
+        </div>
+      </div>
+
+      <div class="sidebar-section panel">
+        <div class="sidebar-section-head"><i class="fa-solid fa-sliders"></i> Filters</div>
+        <div class="controls">
+          <label for="search"><i class="fa-solid fa-magnifying-glass filter-icon"></i> Search</label>
+          <input id="search" type="search" placeholder="Title, category, tag..." />
+
+          <label for="category"><i class="fa-solid fa-folder-open filter-icon"></i> Category</label>
+          <select id="category">
+            <option value="all">All categories</option>
+          </select>
+
+          <label for="skip"><i class="fa-solid fa-star filter-icon"></i> Lesson type</label>
+          <select id="skip">
+            <option value="all">Show all</option>
+            <option value="core">Core only</option>
+            <option value="skippable">Skippable only</option>
+          </select>
+
+          <label for="progress"><i class="fa-solid fa-list-check filter-icon"></i> Progress</label>
+          <select id="progress">
+            <option value="all">All lessons</option>
+            <option value="todo">Unwatched only</option>
+            <option value="done">Completed only</option>
+            <option value="skipped">Skipped only</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="nav-block">
+        <div class="nav-title"><i class="fa-solid fa-calendar-week"></i> Weeks</div>
+        <div id="weekNav" class="nav-list panel sidebar-section"></div>
+      </div>
+
+      <div class="nav-block">
+        <div class="nav-title"><i class="fa-solid fa-tags"></i> Categories</div>
+        <div id="catNav" class="nav-list panel sidebar-section"></div>
+      </div>
+    </aside>
+
+    <div class="content-shell">
+      <button type="button" id="sidebarOpen" class="icon-btn sidebar-open-btn" aria-label="Open sidebar" aria-controls="sidebar">
+        <i class="fa-solid fa-bars" aria-hidden="true"></i>
+      </button>
+    <main>
+      <section class="hero">
+        <div class="hero-card panel">
+          <h2>Learn English with a clear weekly path.</h2>
+          <p>Follow the course in order for everyday conversation, listening, shadowing, vocabulary, and natural confidence. Skip optional cards when you want a faster path.</p>
+        </div>
+        <div class="stats">
+          <div class="stat stat-total panel">
+            <div class="stat-icon" aria-hidden="true"><i class="fa-solid fa-clapperboard"></i></div>
+            <div class="stat-body">
+              <strong id="videoCount">0</strong>
+              <span class="stat-label">Total lessons</span>
+              <span class="stat-sub" id="videoSub">Loading...</span>
+            </div>
+          </div>
+          <div class="stat stat-done panel">
+            <div class="stat-icon" aria-hidden="true"><i class="fa-solid fa-circle-check"></i></div>
+            <div class="stat-body">
+              <strong id="doneCount">0</strong>
+              <span class="stat-label">Completed</span>
+              <span class="stat-sub" id="doneSub">0% of course</span>
+              <div class="stat-bar" title="Completion progress"><span id="doneBar" style="width:0%"></span></div>
+            </div>
+          </div>
+          <div class="stat stat-skipped panel">
+            <div class="stat-icon" aria-hidden="true"><i class="fa-solid fa-forward"></i></div>
+            <div class="stat-body">
+              <strong id="skippedCount">0</strong>
+              <span class="stat-label">Skipped</span>
+              <span class="stat-sub" id="skippedSub">Optional lessons passed</span>
+              <div class="stat-bar" title="Skipped share"><span id="skippedBar" style="width:0%"></span></div>
+            </div>
+          </div>
+          <div class="stat stat-remaining panel">
+            <div class="stat-icon" aria-hidden="true"><i class="fa-regular fa-hourglass-half"></i></div>
+            <div class="stat-body">
+              <strong id="remainingCount">0</strong>
+              <span class="stat-label">Remaining</span>
+              <span class="stat-sub" id="remainingSub">Still to watch</span>
+              <div class="stat-bar" title="Remaining share"><span id="remainingBar" style="width:0%"></span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="section-head">
+        <div>
+          <h3>Course</h3>
+          <p id="status">Loading volka_course.json...</p>
+        </div>
+        <span class="pill" id="progressPill">0% complete</span>
+      </div>
+
+      <div id="weeks"></div>
+    </main>
+    </div>
+  </div>
+
+  <script>
+    const FILE_NAME = 'volka_course.json';
+    const COURSE_WEEKS = [
+      { name: 'Week 1', goal: 'Foundation: questions, introductions, slow listening', categories: ['Essentials', 'Introductions', 'Slow Listening'] },
+      { name: 'Week 2', goal: 'Build speaking: thinking in English and shadowing', categories: ['Thinking in English', 'Shadowing', 'Daily Life'] },
+      { name: 'Week 3', goal: 'Real-world daily conversation', categories: ['Home', 'Shopping', 'City'] },
+      { name: 'Week 4', goal: 'Natural fluency: stories, podcasts, vlogs', categories: ['Real Conversation', 'Comprehensible Input', 'Review'] },
+      { name: 'Week 5+', goal: 'Expansion: travel, food, idioms, slang, advanced practice', categories: ['Travel', 'Food', 'Vocabulary', 'Fluency Expansion'] }
+    ];
+    const CATEGORY_ORDER = [
+      'Essentials', 'Introductions', 'Slow Listening', 'Thinking in English', 'Shadowing',
+      'Daily Life', 'Home', 'Shopping', 'City', 'Real Conversation',
+      'Comprehensible Input', 'Travel', 'Food', 'Vocabulary', 'Fluency Expansion', 'Review'
+    ];
+
+    const $ = (id) => document.getElementById(id);
+    const state = { raw: [], lessons: [], filtered: [], activeWeek: 'all', activeCat: 'all' };
+
+    const rules = [
+      ['Introductions', /introduce|introduc/i],
+      ['Shopping', /shopping|grocery|mall|store/i],
+      ['Home', /home|house|chores|routine|pack/i],
+      ['City', /city|streets|around the city|directions/i],
+      ['Shadowing', /shadow|speak with me|speak along|copy me|pronunciation/i],
+      ['Thinking in English', /think in english|thinking in english/i],
+      ['Slow Listening', /slow english|podcast|listening/i],
+      ['Travel', /travel|airport|vacation|vietnam|indonesia|thailand|mexico|ecuador|canada/i],
+      ['Food', /food|cooking|cook|grocery/i],
+      ['Vocabulary', /verbs|words|phrasal|idioms|slang|vocabulary/i],
+      ['Essentials', /questions|answers|beginner|easy english/i],
+      ['Real Conversation', /real-life|real life|conversation|speak english naturally/i],
+      ['Comprehensible Input', /comprehensible input|vlog|naturally/i]
+    ];
+
+    function pickThumbnail(video = {}) {
+      const direct = video.thumbnail || video.thumbnail_url || video.thumbnailUrl || video.image || video.image_url || video.imageUrl || video.poster || video.cover;
+      if (typeof direct === 'string' && direct.trim()) return direct.trim();
+
+      const thumbs = video.thumbnails || video.thumbnailData || video.images || video.snippet?.thumbnails;
+      if (typeof thumbs === 'string' && thumbs.trim()) return thumbs.trim();
+      if (Array.isArray(thumbs)) {
+        const found = thumbs.find(t => typeof t === 'string' && t.trim()) || thumbs.find(t => t && (t.url || t.src));
+        if (typeof found === 'string') return found.trim();
+        if (found && (found.url || found.src)) return found.url || found.src;
+      }
+      if (thumbs && typeof thumbs === 'object') {
+        const preferred = ['maxres','standard','high','medium','default','hqdefault','mqdefault','sddefault'];
+        for (const key of preferred) {
+          const value = thumbs[key];
+          if (typeof value === 'string' && value.trim()) return value.trim();
+          if (value && (value.url || value.src)) return value.url || value.src;
+        }
+        for (const value of Object.values(thumbs)) {
+          if (typeof value === 'string' && value.trim()) return value.trim();
+          if (value && (value.url || value.src)) return value.url || value.src;
+        }
+      }
+      return '';
+    }
+
+    function normalizeVideos(data) {
+      if (Array.isArray(data)) return data;
+      if (!data || typeof data !== 'object') return [];
+      if (Array.isArray(data.videos)) return data.videos;
+      if (Array.isArray(data.lessons)) return data.lessons;
+      if (Array.isArray(data.weeks)) {
+        return data.weeks.flatMap((week, wi) => {
+          const buckets = [week.lessons, week.videos, week.items, week.days, week.modules].filter(Array.isArray);
+          const lessons = buckets.flat();
+          return lessons.flatMap((item, ii) => {
+            const nested = item && (item.lessons || item.videos || item.items);
+            if (Array.isArray(nested)) {
+              return nested.map((lesson, ni) => ({
+                ...lesson,
+                week: lesson.week || week.name || week.title || `Week ${wi + 1}`,
+                week_goal: lesson.week_goal || week.goal || week.description || '',
+                day_in_week: lesson.day_in_week || item.day || item.day_in_week || ni + 1
+              }));
+            }
+            return {
+              ...item,
+              week: item.week || week.name || week.title || `Week ${wi + 1}`,
+              week_goal: item.week_goal || week.goal || week.description || '',
+              day_in_week: item.day_in_week || ii + 1
+            };
+          });
+        });
+      }
+      if (Array.isArray(data.categories)) {
+        return data.categories.flatMap((cat, ci) => (cat.lessons || cat.videos || cat.items || []).map((lesson) => ({
+          ...lesson,
+          category: lesson.category || cat.name || cat.title || `Category ${ci + 1}`,
+          category_order: lesson.category_order || ci + 1
+        })));
+      }
+      return [];
+    }
+
+    function classify(video) {
+      const text = `${video.title || ''} ${video.url || ''}`;
+      for (const [cat, rx] of rules) if (rx.test(text)) return cat;
+      return 'Fluency Expansion';
+    }
+
+    function toSeconds(duration = '') {
+      const parts = String(duration).split(':').map(Number);
+      if (parts.some(Number.isNaN)) return 999999;
+      return parts.reduce((a, b) => a * 60 + b, 0);
+    }
+
+    function viewsNumber(v = '') {
+      const m = String(v).match(/([\d.]+)\s*([KMB])?/i);
+      if (!m) return 0;
+      const n = parseFloat(m[1]);
+      const mult = { K: 1e3, M: 1e6, B: 1e9 }[(m[2] || '').toUpperCase()] || 1;
+      return n * mult;
+    }
+
+    function isCore(video, category) {
+      const title = video.title || '';
+      return /questions|introduce|slow english podcast #1|start thinking|shadow|daily words|grocery|around the city|speak along|speak english naturally/i.test(title)
+        || ['Essentials','Introductions','Slow Listening','Thinking in English','Shadowing','Home','Shopping','City','Real Conversation'].includes(category);
+    }
+
+    function weekFor(category, index) {
+      const exact = COURSE_WEEKS.findIndex(w => w.categories.includes(category));
+      if (exact >= 0) return COURSE_WEEKS[exact].name;
+      return COURSE_WEEKS[Math.min(Math.floor(index / 20), COURSE_WEEKS.length - 1)].name;
+    }
+
+    function lessonize(videos) {
+      return videos.map((video, index) => {
+        const category = video.category || classify(video);
+        const core = typeof video.skippable === 'boolean' ? !video.skippable : isCore(video, category);
+        const existingTags = Array.isArray(video.tags) ? video.tags : [];
+        return {
+          ...video,
+          thumbnail: pickThumbnail(video),
+          id: video.id || `lesson-${index}-${(video.url || video.title || '').replace(/\W/g,'').slice(-10)}`,
+          number: video.course_order || video.number || index + 1,
+          category,
+          week: video.week || weekFor(category, index),
+          tags: [
+            core ? 'core' : 'skippable',
+            category.toLowerCase().replaceAll(' ', '-'),
+            toSeconds(video.duration) <= 900 ? 'short' : 'deep-practice',
+            ...existingTags.filter(Boolean)
+          ].filter((tag, i, arr) => arr.indexOf(tag) === i),
+          reason: video.reason || (core ? 'Recommended for confident everyday conversation.' : 'Useful expansion lesson. Skip when you want a faster path.')
+        };
+      }).sort((a, b) => {
+        const wa = COURSE_WEEKS.findIndex(w => w.name === a.week);
+        const wb = COURSE_WEEKS.findIndex(w => w.name === b.week);
+        if (wa !== wb && wa !== -1 && wb !== -1) return wa - wb;
+        const ca = CATEGORY_ORDER.indexOf(a.category);
+        const cb = CATEGORY_ORDER.indexOf(b.category);
+        if (ca !== cb) return (ca === -1 ? 99 : ca) - (cb === -1 ? 99 : cb);
+        return (a.course_order || 9999) - (b.course_order || 9999) || viewsNumber(b.views) - viewsNumber(a.views);
+      }).map((v, i) => ({ ...v, number: i + 1, week: v.week || weekFor(v.category, i) }));
+    }
+
+    function doneSet() {
+      try { return new Set(JSON.parse(localStorage.getItem('volkaDone') || '[]')); }
+      catch { return new Set(); }
+    }
+
+    function saveDone(set) {
+      localStorage.setItem('volkaDone', JSON.stringify([...set]));
+    }
+
+    function skippedSet() {
+      try { return new Set(JSON.parse(localStorage.getItem('volkaSkipped') || '[]')); }
+      catch { return new Set(); }
+    }
+
+    function saveSkipped(set) {
+      localStorage.setItem('volkaSkipped', JSON.stringify([...set]));
+    }
+
+    function renderSidebarProgress() {
+      const done = doneSet();
+      const skipped = skippedSet();
+      const total = state.lessons.length;
+      const handled = new Set([...done, ...skipped]);
+      const pct = total ? Math.round((handled.size / total) * 100) : 0;
+      const remaining = Math.max(0, total - handled.size);
+      $('sidebarPct').textContent = `${pct}%`;
+      $('sidebarBar').style.width = `${pct}%`;
+      $('sidebarRemaining').textContent = `${remaining} left`;
+      $('sidebarDone').innerHTML = `<i class="fa-solid fa-check"></i>${done.size} done`;
+      $('sidebarSkipped').innerHTML = `<i class="fa-solid fa-forward"></i>${skipped.size} skipped`;
+    }
+
+    function isMobileSidebar() {
+      return window.matchMedia('(max-width: 760px)').matches;
+    }
+
+    function isSidebarOpen() {
+      return !document.body.classList.contains('sidebar-collapsed');
+    }
+
+    function updateSidebarUi() {
+      const open = isSidebarOpen();
+      $('sidebarCollapse')?.setAttribute('aria-expanded', String(open));
+      $('sidebarOpen')?.setAttribute('aria-hidden', String(open));
+      $('sidebarBackdrop')?.setAttribute('aria-hidden', String(!open));
+    }
+
+    function setSidebarOpen(open) {
+      document.body.classList.toggle('sidebar-collapsed', !open);
+      if (!isMobileSidebar()) {
+        localStorage.setItem('volkaSidebar', open ? 'open' : 'closed');
+      }
+      updateSidebarUi();
+    }
+
+    function closeSidebar() {
+      setSidebarOpen(false);
+    }
+
+    function initSidebar() {
+      if (isMobileSidebar()) {
+        document.body.classList.add('sidebar-collapsed');
+      } else if (localStorage.getItem('volkaSidebar') === 'closed') {
+        document.body.classList.add('sidebar-collapsed');
+      }
+      updateSidebarUi();
+    }
+
+    function maybeCloseSidebarOnMobile() {
+      if (isMobileSidebar()) closeSidebar();
+    }
+
+    function navItemHtml(label, count, active, extra = '') {
+      return `
+        <button class="nav-item${active ? ' active' : ''}" ${extra}>
+          <span class="nav-label-wrap">
+            <span class="nav-label">${escapeHtml(label)}</span>
+          </span>
+          <span class="nav-count">${count}</span>
+        </button>
+      `;
+    }
+
+    function weekNavItemHtml(w, count, doneCount, active) {
+      const pct = count ? Math.round((doneCount / count) * 100) : 0;
+      return `
+        <button class="nav-item${active ? ' active' : ''}" data-week="${escapeHtml(w)}">
+          <span class="nav-label-wrap">
+            <span class="nav-label">${escapeHtml(w)}</span>
+            <span class="nav-week-bar" title="${pct}% done in this week"><span style="width:${pct}%"></span></span>
+          </span>
+          <span class="nav-count">${count}</span>
+        </button>
+      `;
+    }
+
+    function renderNav() {
+      const done = doneSet();
+      renderSidebarProgress();
+
+      const weekNav = $('weekNav');
+      weekNav.innerHTML = navItemHtml('All weeks', state.lessons.length, state.activeWeek === 'all', 'data-week="all"');
+      COURSE_WEEKS.forEach(w => {
+        const lessons = state.lessons.filter(x => x.week === w.name);
+        const count = lessons.length;
+        if (!count) return;
+        const doneCount = lessons.filter(x => done.has(x.id)).length;
+        weekNav.insertAdjacentHTML('beforeend', weekNavItemHtml(w.name, count, doneCount, state.activeWeek === w.name));
+      });
+      weekNav.querySelectorAll('button').forEach(btn => btn.onclick = () => {
+        state.activeWeek = btn.dataset.week;
+        applyFilters();
+        maybeCloseSidebarOnMobile();
+      });
+
+      const catNav = $('catNav');
+      catNav.innerHTML = '';
+      CATEGORY_ORDER.forEach(cat => {
+        const count = state.lessons.filter(x => x.category === cat).length;
+        if (!count) return;
+        catNav.insertAdjacentHTML('beforeend', navItemHtml(cat, count, state.activeCat === cat, `data-cat="${escapeHtml(cat)}"`));
+      });
+      catNav.querySelectorAll('button').forEach(btn => {
+        btn.onclick = () => {
+          state.activeCat = state.activeCat === btn.dataset.cat ? 'all' : btn.dataset.cat;
+          $('category').value = state.activeCat;
+          applyFilters();
+          maybeCloseSidebarOnMobile();
+        };
+      });
+    }
+
+    function renderCategorySelect() {
+      const select = $('category');
+      const cats = [...new Set(state.lessons.map(x => x.category))].sort((a,b) => CATEGORY_ORDER.indexOf(a)-CATEGORY_ORDER.indexOf(b));
+      select.innerHTML = `<option value="all">All categories</option>` + cats.map(c => `<option value="${c}">${c}</option>`).join('');
+    }
+
+    function escapeHtml(str = '') {
+      return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+    }
+
+    function lessonStatus(lesson, done, skipped) {
+      if (done.has(lesson.id)) return 2;
+      if (skipped.has(lesson.id)) return 1;
+      return 0;
+    }
+
+    function sortWeekLessons(lessons, done, skipped, progress) {
+      if (progress === 'all') {
+        return [...lessons].sort((a, b) => a.number - b.number);
+      }
+      return [...lessons].sort((a, b) => {
+        const sa = lessonStatus(a, done, skipped);
+        const sb = lessonStatus(b, done, skipped);
+        if (sa !== sb) return sa - sb;
+        return a.number - b.number;
+      });
+    }
+
+    function weekProgressHtml(weekName, done) {
+      const total = state.lessons.filter(x => x.week === weekName).length;
+      const completed = state.lessons.filter(x => x.week === weekName && done.has(x.id)).length;
+      const pct = total ? Math.round((completed / total) * 100) : 0;
+      return `
+        <span class="pill">${completed}/${total} done</span>
+        <span class="week-progress" title="${pct}% of week complete"><span style="width:${pct}%"></span></span>
+      `;
+    }
+
+    function render() {
+      const root = $('weeks');
+      const done = doneSet();
+      const skipped = skippedSet();
+      const lessons = state.filtered;
+      const progress = $('progress').value;
+      const handled = new Set([...done, ...skipped]);
+      const total = state.lessons.length;
+      const donePct = total ? Math.round((done.size / total) * 100) : 0;
+      const skippedPct = total ? Math.round((skipped.size / total) * 100) : 0;
+      const remaining = total - handled.size;
+      const remainingPct = total ? Math.round((remaining / total) * 100) : 0;
+      const weekCount = COURSE_WEEKS.filter(w => state.lessons.some(x => x.week === w.name)).length;
+      const coreCount = state.lessons.filter(x => x.tags.includes('core')).length;
+
+      $('videoCount').textContent = total;
+      $('videoSub').textContent = `${weekCount} week${weekCount === 1 ? '' : 's'} · ${coreCount} core`;
+      $('doneCount').textContent = done.size;
+      $('doneSub').textContent = total ? `${done.size} of ${total} · ${donePct}%` : '0% of course';
+      $('doneBar').style.width = `${donePct}%`;
+      $('skippedCount').textContent = skipped.size;
+      $('skippedSub').textContent = skipped.size ? `${skippedPct}% of course skipped` : 'None skipped yet';
+      $('skippedBar').style.width = `${skippedPct}%`;
+      $('remainingCount').textContent = Math.max(0, remaining);
+      $('remainingSub').textContent = remaining ? `${remainingPct}% left to go` : 'All handled';
+      $('remainingBar').style.width = `${remainingPct}%`;
+
+      const pct = total ? Math.round((handled.size / total) * 100) : 0;
+      $('progressPill').textContent = `${pct}% complete`;
+      $('status').textContent = `${lessons.length} lesson${lessons.length === 1 ? '' : 's'} shown · Follow categories from top to bottom.`;
+
+      if (!lessons.length) {
+        root.innerHTML = `<div class="panel empty">No lessons match your filters.</div>`;
+        return;
+      }
+
+      const grouped = {};
+      for (const lesson of lessons) {
+        (grouped[lesson.week] ||= []).push(lesson);
+      }
+
+      root.innerHTML = COURSE_WEEKS
+        .filter(w => grouped[w.name])
+        .map(w => {
+          const weekLessons = sortWeekLessons(grouped[w.name], done, skipped, progress);
+          return `
+          <section class="week panel" id="${w.name.replace(/\s+/g,'-').toLowerCase()}">
+            <div class="week-top">
+              <div>
+                <div class="week-title">${escapeHtml(w.name)}</div>
+                <p class="subtitle">${escapeHtml(w.goal)}</p>
+              </div>
+              <div class="week-meta">
+                <span class="pill">${weekLessons.length} shown</span>
+                ${weekProgressHtml(w.name, done)}
+              </div>
+            </div>
+            <div class="grid">
+              ${weekLessons.map(l => cardHtml(l, done, skipped)).join('')}
+            </div>
+          </section>
+        `;
+        }).join('');
+
+      root.querySelectorAll('[data-done]').forEach(btn => {
+        const id = btn.dataset.done;
+        const isDone = done.has(id);
+        btn.classList.toggle('active', isDone);
+        btn.onclick = () => {
+          const set = doneSet();
+          const skip = skippedSet();
+          if (isDone) {
+            set.delete(id);
+          } else {
+            set.add(id);
+            skip.delete(id);
+            saveSkipped(skip);
+          }
+          saveDone(set);
+          applyFilters();
+        };
+      });
+
+      root.querySelectorAll('[data-skip]').forEach(btn => {
+        const id = btn.dataset.skip;
+        const isSkipped = skipped.has(id);
+        btn.classList.toggle('active', isSkipped);
+        btn.onclick = () => {
+          const set = skippedSet();
+          const doneIds = doneSet();
+          if (isSkipped) {
+            set.delete(id);
+          } else {
+            set.add(id);
+            doneIds.delete(id);
+            saveDone(doneIds);
+          }
+          saveSkipped(set);
+          applyFilters();
+        };
+      });
+    }
+
+    function cardHtml(v, done, skipped) {
+      const thumb = pickThumbnail(v);
+      const core = v.tags.includes('core');
+      const isDone = done.has(v.id);
+      const isSkipped = skipped.has(v.id);
+      return `
+        <article class="card${isDone ? ' done' : ''}${isSkipped ? ' skipped' : ''}">
+          <a class="thumb" href="${escapeHtml(v.url)}" target="_blank" rel="noopener">
+            ${isDone ? '<span class="done-badge" aria-label="Completed"><i class="fa-solid fa-check"></i></span>' : ''}
+            ${thumb ? `<img src="${escapeHtml(thumb)}" alt="${escapeHtml(v.title || 'Video thumbnail')}" loading="lazy" onerror="this.remove()">` : ''}
+            <span class="thumb-fallback">No thumbnail</span>
+            <span class="duration">${escapeHtml(v.duration || '')}</span>
+          </a>
+          <div class="card-body">
+            <div class="meta-row">
+              <span class="tag primary">${String(v.number).padStart(2,'0')}</span>
+              <span class="tag">${escapeHtml(v.category)}</span>
+              <span class="tag">${core ? 'core' : 'skippable'}</span>
+              ${isDone ? '<span class="tag completed">completed</span>' : ''}
+              ${isSkipped ? '<span class="tag skipped-tag">skipped</span>' : ''}
+            </div>
+            <h4>${escapeHtml(v.title)}</h4>
+            <p>${escapeHtml(v.views || '')} · ${escapeHtml(v.uploaded || '')}</p>
+            <p>${escapeHtml(v.reason)}</p>
+            <div class="actions">
+              <a class="watch${isDone ? ' rewatch' : ''}" href="${escapeHtml(v.url)}" target="_blank" rel="noopener"><i class="fa-solid fa-play"></i> ${isDone ? 'Rewatch' : 'Watch'}</a>
+              <div class="status-btns">
+                <button type="button" class="status-btn done-btn${isDone ? ' active' : ''}" data-done="${escapeHtml(v.id)}"><i class="fa-solid fa-check"></i> Done</button>
+                <button type="button" class="status-btn skip-btn${isSkipped ? ' active' : ''}" data-skip="${escapeHtml(v.id)}"><i class="fa-solid fa-forward"></i> Skipped</button>
+              </div>
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    function applyFilters() {
+      const q = $('search').value.trim().toLowerCase();
+      const cat = $('category').value;
+      const skip = $('skip').value;
+      const progress = $('progress').value;
+      const done = doneSet();
+      const skipped = skippedSet();
+      state.activeCat = cat;
+
+      state.filtered = state.lessons.filter(v => {
+        const hay = `${v.title} ${v.category} ${v.week} ${v.tags.join(' ')}`.toLowerCase();
+        const isDone = done.has(v.id);
+        const isSkipped = skipped.has(v.id);
+        if (q && !hay.includes(q)) return false;
+        if (state.activeWeek !== 'all' && v.week !== state.activeWeek) return false;
+        if (cat !== 'all' && v.category !== cat) return false;
+        if (skip === 'core' && !v.tags.includes('core')) return false;
+        if (skip === 'skippable' && !v.tags.includes('skippable')) return false;
+        // "All lessons" keeps every lesson visible (unwatched, done, skipped)
+        if (progress === 'all') return true;
+        if (progress === 'todo' && (isDone || isSkipped)) return false;
+        if (progress === 'done' && !isDone) return false;
+        if (progress === 'skipped' && !isSkipped) return false;
+        return true;
+      });
+
+      renderNav();
+      render();
+    }
+
+    async function init() {
+      try {
+        const res = await fetch(FILE_NAME);
+        if (!res.ok) throw new Error(`Could not load ${FILE_NAME}`);
+        const data = await res.json();
+        const videos = normalizeVideos(data);
+        state.raw = videos;
+        state.lessons = lessonize(videos);
+        state.filtered = state.lessons;
+        renderCategorySelect();
+        renderNav();
+        render();
+      } catch (err) {
+        $('status').textContent = 'Could not load volka_course.json. Keep the HTML and JSON in the same folder, or open with a local server.';
+        $('weeks').innerHTML = `<div class="panel empty">${escapeHtml(err.message)}</div>`;
+      }
+    }
+
+    $('search').addEventListener('input', applyFilters);
+    $('category').addEventListener('change', applyFilters);
+    $('skip').addEventListener('change', applyFilters);
+    $('progress').addEventListener('change', applyFilters);
+    $('sidebarCollapse').addEventListener('click', closeSidebar);
+    $('sidebarOpen').addEventListener('click', () => setSidebarOpen(true));
+    $('sidebarBackdrop').addEventListener('click', closeSidebar);
+    window.addEventListener('resize', () => {
+      if (!isMobileSidebar() && localStorage.getItem('volkaSidebar') !== 'closed') {
+        document.body.classList.remove('sidebar-collapsed');
+      }
+      updateSidebarUi();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && isSidebarOpen()) closeSidebar();
+    });
+    initSidebar();
+    init();
+  </script>
+</body>
+</html>
